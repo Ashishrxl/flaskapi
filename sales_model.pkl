@@ -1,0 +1,29 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+import pickle
+
+# Sample data
+data = pd.DataFrame({
+    'product_id': [1, 2, 1, 3, 2, 3],
+    'date': ['2025-01-01', '2025-01-01', '2025-01-02', '2025-01-02', '2025-01-03', '2025-01-03'],
+    'quantity': [10, 15, 12, 8, 20, 5]
+})
+
+# Preprocess
+data['date'] = pd.to_datetime(data['date']).map(pd.Timestamp.toordinal)
+X = data[['product_id', 'date']]
+y = data['quantity']
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Save the model
+with open('sales_model.pkl', 'wb') as file:
+    pickle.dump(model, file)
+
+print("Model trained and saved as sales_model.pkl")
