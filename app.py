@@ -1,30 +1,36 @@
 from flask import Flask, request, jsonify
-import pickle
-import pandas as pd
-
-# Load the trained model
-with open('sales_model.pkl', 'rb') as file:
-    model = pickle.load(file)
+from flask_cors import CORS
+import sqlite3
+from langchain.llms import DeepSeek
+from langchain.chains import SQLDatabaseChain
+from langchain.sql_database import SQLDatabase
 
 app = Flask(__name__)
+CORS(app)
 
-@app.route('/')
-def home():
-    return "AI Model API is running!"
+# Setup SQLite database
+db_path = "example.db"
+db = SQLDatabase.from_uri(f"sqlite:///{db_path}")
 
-@app.route('/predict', methods=['POST'])
-def predict():
+# Initialize DeepSeek LLM
+llm = DeepSeek()
+
+# Setup SQL Generation Chain
+chain = SQLDatabaseChain.from_llm(llm, db, verbose=True)
+
+@app.route("/query", methods=["POST"])
+def query_db():
+    data = request.json
+    user_query = data.get("query", "")
+
+    if not user_query:
+        return jsonify({"error": "No query provided"}), 400
+
     try:
-        # Get data from request
-        data = request.json
-        product_id = data['product_id']
-        date = pd.to_datetime(data['date']).toordinal()
-        
-        # Predict sales quantity
-        prediction = model.predict([[product_id, date]])
-        return jsonify({'predicted_quantity': prediction[0]})
+        sql_response = chain.run(user_query)
+        return jsonify({"response": sql_response})
     except Exception as e:
-        return jsonify({'error': str(e)})
+        return jsonify({"error": str(e)}), 500
 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
