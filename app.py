@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import sqlite3
+import pymysql
+import os
 from langchain.llms import DeepSeek
 from langchain.chains import SQLDatabaseChain
 from langchain.sql_database import SQLDatabase
@@ -8,14 +9,25 @@ from langchain.sql_database import SQLDatabase
 app = Flask(__name__)
 CORS(app)
 
-# Setup SQLite database
-db_path = "example.db"
-db = SQLDatabase.from_uri(f"sqlite:///{db_path}")
+# MySQL Database Config (Use InfinityFree Credentials)
+DB_HOST = "sqlXXX.infinityfree.com"  # Change this
+DB_USER = "your_username"
+DB_PASSWORD = "your_password"
+DB_NAME = "your_database_name"
 
-# Initialize DeepSeek LLM
+# Connect to MySQL
+def get_db_connection():
+    return pymysql.connect(
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        database=DB_NAME,
+        cursorclass=pymysql.cursors.DictCursor
+    )
+
+# Setup LangChain & DeepSeek for AI SQL conversion
+db = SQLDatabase.from_uri(f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}")
 llm = DeepSeek()
-
-# Setup SQL Generation Chain
 chain = SQLDatabaseChain.from_llm(llm, db, verbose=True)
 
 @app.route("/query", methods=["POST"])
