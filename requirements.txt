@@ -1,5 +1,6 @@
 flask
 flask-cors
+pymysql
 langchain
 deepseek
-sqlite3
+gunicorn
