@@ -10,10 +10,10 @@ app = Flask(__name__)
 CORS(app)
 
 # MySQL Database Config (Use InfinityFree Credentials)
-DB_HOST = "sqlXXX.infinityfree.com"  # Change this
-DB_USER = "your_username"
-DB_PASSWORD = "your_password"
-DB_NAME = "your_database_name"
+DB_HOST = "sql109.infinityfree.com"
+DB_USER = "epiz_33085212"
+DB_PASSWORD = "yVIHCexjXW9YNCf"
+DB_NAME = "epiz_33085212_justfun"
 
 # Connect to MySQL
 def get_db_connection():
